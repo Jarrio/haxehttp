@@ -1,0 +1,18 @@
+{
+	"name": "haxehttp",
+	"url": "https://github.com/Jarrio/haxehttp",
+	"license": "MIT",
+	"tags": [
+		"cross",
+		"haxe",
+		"http"
+	],
+	"description": "This library is to shadow the standard haxe http api and improve it.",
+	"version": "0.0.1",
+	"classPath": "src/",
+	"releasenote": "Initial release, NOT COMPLETE.",
+	"contributors": [
+		"Jarrio"
+	],
+	"main": "/tools.Main"
+}
