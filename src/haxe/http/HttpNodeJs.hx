@@ -28,6 +28,7 @@ import js.node.Buffer;
 
 class HttpNodeJs extends haxe.http.HttpBase {
 	var req:js.node.http.ClientRequest;
+	public var responseHeaders:Map<String, String>;
 
 	public function new(url:String) {
 		super(url);
@@ -101,6 +102,11 @@ class HttpNodeJs extends haxe.http.HttpBase {
 				var buf = (data.length == 1 ? data[0] : Buffer.concat(data));
 				responseBytes = Bytes.ofData(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
 				req = null;
+				responseHeaders = new haxe.ds.StringMap();
+				for (field in Reflect.fields(res.headers)) {
+					responseHeaders.set(field, Reflect.field(res.headers, field));
+				}
+				
 				if (s != null && s >= 200 && s < 400) {
 					success(responseBytes);
 				} else {

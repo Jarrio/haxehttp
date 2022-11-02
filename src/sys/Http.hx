@@ -495,7 +495,7 @@ class Http extends haxe.http.HttpBase {
 		h.onError = function(e) {
 			throw e;
 		}
-		h.request(false);
+		h.request(HttpMethod.Get);
 		return r;
 	}
 }

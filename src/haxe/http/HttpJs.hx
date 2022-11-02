@@ -22,6 +22,7 @@
 
 package haxe.http;
 
+import js.Browser;
 #if js
 import js.html.XMLHttpRequestResponseType;
 import js.html.Blob;
@@ -30,6 +31,7 @@ import haxe.io.Bytes;
 class HttpJs extends haxe.http.HttpBase {
 	public var async:Bool;
 	public var withCredentials:Bool;
+	public var responseHeaders:Map<String, String>;
 
 	var req:js.html.XMLHttpRequest;
 
@@ -53,6 +55,8 @@ class HttpJs extends haxe.http.HttpBase {
 	public override function request(?post:HttpMethod) {
 		this.responseAsString = null;
 		this.responseBytes = null;
+		this.responseHeaders = null;
+
 		var r = req = js.Browser.createXMLHttpRequest();
 		var onreadystatechange = function(_) {
 			if (r.readyState != 4)
@@ -73,6 +77,19 @@ class HttpJs extends haxe.http.HttpBase {
 				onStatus(s);
 			if (s != null && s >= 200 && s < 400) {
 				req = null;
+				// split headers and remove the last \r\n\r\n
+				var headers = r.getAllResponseHeaders().split('\r\n');
+				headers = headers.filter(h -> h != '');
+				trace(headers);
+				// store response headers
+				responseHeaders = new haxe.ds.StringMap();
+				for (hline in headers) {
+					var a = hline.split(": ");
+					var hname = a.shift();
+					var hval = if (a.length == 1) a[0] else a.join(": ");
+					hval = StringTools.ltrim(StringTools.rtrim(hval));
+					responseHeaders.set(hname, hval);
+				}
 				success(Bytes.ofData(r.response));
 			} else if (s == null || (s == 0 && r.response == null)) {
 				req = null;
@@ -86,7 +103,21 @@ class HttpJs extends haxe.http.HttpBase {
 						req = null;
 						onError("Unknown host");
 					default:
+						// split headers and remove the last \r\n\r\n
+						var headers = r.getAllResponseHeaders().split('\r\n');
+						headers = headers.filter(h -> h != '');
+						trace(headers);
+						// store response headers
+						responseHeaders = new haxe.ds.StringMap();
+						for (hline in headers) {
+							var a = hline.split(": ");
+							var hname = a.shift();
+							var hval = if (a.length == 1) a[0] else a.join(": ");
+							hval = StringTools.ltrim(StringTools.rtrim(hval));
+							responseHeaders.set(hname, hval);
+						}
 						req = null;
+						
 						responseBytes = r.response != null ? Bytes.ofData(r.response) : null;
 						onError("Http Error #" + r.status);
 				}
